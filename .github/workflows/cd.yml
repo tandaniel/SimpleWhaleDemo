@@ -43,7 +43,7 @@ jobs:
       id: simple_whale_demo-container
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition/${{steps.vars.outputs.stage}}.json
+        task-definition: task-definition/${{steps.vars.outputs.stage}}
         container-name: simple_whale_demo-${{steps.vars.outputs.stage}}
         image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.AWS_ECR_REPOSITORY }}-${{steps.vars.outputs.stage}}:${{ github.sha }}
     
@@ -51,8 +51,8 @@ jobs:
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.pawlyclinic-api-container.outputs.task-definition }}
-        service: simple_whale_demo${{ steps.vars.outputs.stage }}
-        cluster: simple_whale_demo${{ steps.vars.outputs.stage }}
+        service: simple_whale_demo-${{ steps.vars.outputs.stage }}
+        cluster: simple_whale_demo-${{ steps.vars.outputs.stage }}
 
     - name: Logout of Amazon ECR
       if: always()
