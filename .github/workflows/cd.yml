@@ -5,10 +5,9 @@ on:
     branches: [ main ]
 
 env:
-  AWS_REGION: eu-central-1                    # set this to your preferred AWS region, e.g. us-west-1
   AWS_ECR_REPOSITORY: simple_whale_demo
-jobs:
 
+jobs:
   docker-build-push-deploy:
     name: Docker build, push and deploy
     runs-on: ubuntu-latest
