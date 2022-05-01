@@ -4,9 +4,6 @@ on:
   push:
     branches: [ main ]
 
-env:
-  AWS_ECR_REPOSITORY: simple_whale_demo
-
 jobs:
   docker-build-push-deploy:
     name: Docker build, push and deploy
@@ -31,20 +28,21 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push image to Amazon ECR
-        id: simple_whale_demo-container
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: task-definition/${{steps.vars.outputs.stage}}.json
-          container-name: simple_whale_demo-${{steps.vars.outputs.stage}}
-          image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.AWS_ECR_REPOSITORY }}-${{steps.vars.outputs.stage}}:${{ github.sha }}
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: simple_whale_demo
+        IMAGE_TAG: ${{ github.sha }}        
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
       
       - name: Deploy to Amazon ECS service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.pawlyclinic-api-container.outputs.task-definition }}
-          service: simple_whale_demo-${{ steps.vars.outputs.stage }}
-          cluster: simple_whale_demo-${{ steps.vars.outputs.stage }}
+          service: simple_whale_demo${{ steps.vars.outputs.stage }}
+          cluster: simple_whale_demo${{ steps.vars.outputs.stage }}
 
       - name: Logout of Amazon ECR
         if: always()
