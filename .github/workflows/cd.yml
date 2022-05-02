@@ -11,7 +11,7 @@ env:
   ECR_REPOSITORY: simple_whale_demo        
   ECS_SERVICE: demo-service               
   ECS_CLUSTER: fargate-cluster              
-  ECS_TASK_DEFINITION: .aws/dev.json 
+  ECS_TASK_DEFINITION: .aws/mywhaleapp.json 
   CONTAINER_NAME: nginx
   
 defaults:
