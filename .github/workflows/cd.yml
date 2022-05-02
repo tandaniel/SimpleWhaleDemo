@@ -1,84 +1,58 @@
-name: Deploy to Amazon ECS
-
+name: ECS Starter CD Develop
 on:
-  create:
+  push:
     branches: [ main ]
-    tags:
-     - .*
-
-# Allows you to run this workflow manually from the Actions tab
-workflow_dispatch:
-
-env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}                  
-  ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }}           
-  ECS_SERVICE: demo-service               
-  ECS_CLUSTER: fargate-cluster              
-  ECS_TASK_DEFINITION: .task-definition/mywhaleapp.json 
-  CONTAINER_NAME: nginx
-  
-defaults:
- run:
-   shell: bash
-
 jobs:
-
-  deploy:
-    name: Deploy
+  build:
+    name: Build image
     runs-on: ubuntu-latest
-
-    permissions:
-      packages: write
-      contents: read
-
+    
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Set Tag Number
-        id: tag-number
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-
-      - name: Check Tag Release
-        env:
-          RELEASE_VERSION: ${{ steps.tag-number.outputs.tag }}
-        run: |
-          echo $RELEASE_VERSION
-          echo ${{ steps.vars.outputs.tag }}
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-        
-      - name: Build, tag, and push image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ steps.tag-number.outputs.tag }}
-        run: |
-          docker build --file ./Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+    - name: Check Out Repo 
+      uses: actions/checkout@v2
+    - name: Get branch name
+      id: vars
+      run: echo ::set-output name=stage::${GITHUB_REF#refs/*/}
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: simple_whale_demo
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        IMAGE_TAG: ${{ github.sha }}        
+        ECS_TASK_DEFINITION: ./task-definition/dev.json
+      run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-      
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
+    
+    - name: List files
+      run: ls -R
+    - name: Render Amazon ECS task definition
+      id: simple_whale_demo-container
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition
+        task-definition: ${{ env.ECS_TASK_DEFINITION }}
+        container-name: simple_whale_demo
+        image: ${{ steps.build-image.outputs.image }}
 
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+
+    - name: Deploy to Amazon ECS service
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: task-definition/dev.json
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: simple_whale_demo
+        cluster: simple_whale_demo
+
+    - name: Logout of Amazon ECR
+      if: always()
+      run: docker logout ${{ steps.login-ecr.outputs.registry }}
