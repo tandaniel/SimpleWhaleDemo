@@ -49,7 +49,7 @@ jobs:
 
     - name: Render Amazon ECS task definition
       # Fill in the new image ID in the Amazon ECS task definition
-      id: simple_whale_demo-container
+      id: simple_whale_demo
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: mywhaleapp.json
@@ -59,7 +59,7 @@ jobs:
     - name: Deploy to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: ${{ steps.simple_whale_demo-container.outputs.task-definition }}
+        task-definition: ${{ steps.simple_whale_demo.outputs.task-definition }}
         service: simple_whale_demo-service
         cluster: fargate-cluster
         wait-for-service-stability: true
