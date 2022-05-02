@@ -46,17 +46,17 @@ jobs:
       id: simple_whale_demo-container
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition/${{steps.vars.outputs.stage}}
-        container-name: simple_whale_demo-${{steps.vars.outputs.stage}}
-        image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.AWS_ECR_REPOSITORY }}-${{steps.vars.outputs.stage}}:${{ github.sha }}
+        task-definition: task-definition
+        container-name: simple_whale_demo
+        image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.AWS_ECR_REPOSITORY }}:${{ github.sha }}
     
 
     - name: Deploy to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: task-definition/main/dev.json
-        service: simple_whale_demo-${{ steps.vars.outputs.stage }}
-        cluster: simple_whale_demo-${{ steps.vars.outputs.stage }}
+        task-definition: task-definition/dev.json
+        service: simple_whale_demo
+        cluster: simple_whale_demo
 
     - name: Logout of Amazon ECR
       if: always()
