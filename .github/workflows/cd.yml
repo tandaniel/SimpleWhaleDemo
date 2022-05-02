@@ -14,9 +14,9 @@ env:
   ECS_TASK_DEFINITION: .aws/mywhaleapp.json 
   CONTAINER_NAME: nginx
   
-defaults:
-  run:
-    shell: bash
+#defaults:
+#  run:
+#    shell: bash
 
 jobs:
 
