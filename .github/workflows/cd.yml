@@ -37,17 +37,22 @@ jobs:
         IMAGE_TAG: ${{ github.sha }}        
         ECS_TASK_DEFINITION: ./task-definition/dev.json
       run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
     
     - name: List files
       run: ls -R
 
     - name: Render Amazon ECS task definition
+      # Fill in the new image ID in the Amazon ECS task definition
       id: simple_whale_demo-container
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: ./task-definition/dev.json
+        task-definition: task-definition.json
         container-name: simple_whale_demo
         image: ${{ steps.build-image.outputs.image }}
     
@@ -57,6 +62,7 @@ jobs:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
         service: simple_whale_demo
         cluster: simple_whale_demo
+        wait-for-service-stability: true
 
     - name: Logout of Amazon ECR
       if: always()
