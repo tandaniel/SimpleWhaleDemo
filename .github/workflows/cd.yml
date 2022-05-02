@@ -41,7 +41,7 @@ jobs:
     
     - name: List files
       run: ls -R
-      
+
     - name: Render Amazon ECS task definition
       id: simple_whale_demo-container
       uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -54,7 +54,7 @@ jobs:
     - name: Deploy to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: dev.json
+        task-definition: task-definition/${{steps.vars.outputs.stage}}/dev.json
         service: simple_whale_demo-${{ steps.vars.outputs.stage }}
         cluster: simple_whale_demo-${{ steps.vars.outputs.stage }}
 
