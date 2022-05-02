@@ -28,7 +28,6 @@ jobs:
         ECR_REPOSITORY: simple_whale_demo
         AWS_REGION: ${{ secrets.AWS_REGION }}
         IMAGE_TAG: ${{ github.sha }}        
-        ECS_TASK_DEFINITION: ./task-definition/dev.json
       run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -39,19 +38,17 @@ jobs:
       id: simple_whale_demo-container
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition
-        task-definition: ${{ env.ECS_TASK_DEFINITION }}
-        container-name: simple_whale_demo
-        image: ${{ steps.build-image.outputs.image }}
-
-
+        task-definition: task-definition/${{steps.vars.outputs.stage}}
+        container-name: simple_whale_demo-${{steps.vars.outputs.stage}}
+        image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.AWS_ECR_REPOSITORY }}-${{steps.vars.outputs.stage}}:${{ github.sha }}
+    
     - name: Deploy to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: task-definition/dev.json
-        task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: simple_whale_demo
-        cluster: simple_whale_demo
+        task-definition: task-definition/${{steps.vars.outputs.stage}}/dev.json
+        task-definition: task-definition/main/dev.json
+        service: simple_whale_demo-${{ steps.vars.outputs.stage }}
+        cluster: simple_whale_demo-${{ steps.vars.outputs.stage }}
 
     - name: Logout of Amazon ECR
       if: always()
