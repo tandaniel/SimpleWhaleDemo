@@ -7,7 +7,7 @@ on:
       - .*
 
 env:
-  AWS_REGION: ap-south-1                   
+  AWS_REGION: eu-central-1                   
   ECR_REPOSITORY: simple_whale_demo        
   ECS_SERVICE: demo-service               
   ECS_CLUSTER: fargate-cluster              
