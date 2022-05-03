@@ -47,10 +47,10 @@ jobs:
 
     - name: Render Amazon ECS task definition
       # Fill in the new image ID in the Amazon ECS task definition
-      id: simple_whale_demo-container
+      id: simple_whale_demo-task
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition:  ./task-definition/dev.json #mywhaleapp.json
+        task-definition: #mywhaleapp.json
         container-name: simple_whale_demo
         image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG #${{ steps.build-image.outputs.image }}
     
