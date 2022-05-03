@@ -50,13 +50,13 @@ jobs:
       id: simple_whale_demo-container
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: mywhaleapp.json
+        task-definition:  ./task-definition/dev.json #mywhaleapp.json
         container-name: simple_whale_demo
         image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG #${{ steps.build-image.outputs.image }}
     
     - name: List files
       run: ls -R
-      
+
     - name: Deploy to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
