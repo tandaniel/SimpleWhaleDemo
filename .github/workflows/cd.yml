@@ -31,7 +31,7 @@ jobs:
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}       
+        IMAGE_TAG: ${{ github.sha }}
         ECR_REPOSITORY: simple_whale_demo
         AWS_REGION: ${{ secrets.AWS_REGION }} 
         ECS_TASK_DEFINITION: ./task-definition/dev.json
@@ -50,8 +50,9 @@ jobs:
       with:
         task-definition: task-definition/dev.json
         container-name: simple_whale_demo
-        image: ${{ steps.build-image.outputs.image }}
-        #image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG #${{ steps.build-image.outputs.image }}
+        image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.AWS_ECR_REPOSITORY }}-${{steps.vars.outputs.stage}}:${{ github.sha }}
+        # image: ${{ steps.build-image.outputs.image }}
+        # image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG #${{ steps.build-image.outputs.image }}
     
     - name: List files
       run: ls -R
