@@ -62,8 +62,6 @@ jobs:
       with:
         task-definition: ${{ steps.simple_whale_demo-task.outputs.task-definition }}
         service: simple_whale_demo
-        #task-definition: ${{ steps.simple_whale_demo-container.outputs.task-definition }}
-        #service: simple_whale_demo-service
         cluster: fargate-cluster
         wait-for-service-stability: true
 
