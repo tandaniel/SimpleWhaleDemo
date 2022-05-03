@@ -1,4 +1,4 @@
-name: ECS Starter CD Develop
+name: Deploy to Amazon ECS
 
 on:
   push:
@@ -31,9 +31,9 @@ jobs:
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}       
         ECR_REPOSITORY: simple_whale_demo
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-        IMAGE_TAG: ${{ github.sha }}        
+        AWS_REGION: ${{ secrets.AWS_REGION }} 
         ECS_TASK_DEFINITION: ./task-definition/dev.json
       run: |
           # Build a docker container and
@@ -42,18 +42,15 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-    
-    - name: List files
-      run: ls -R
 
     - name: Render Amazon ECS task definition
       # Fill in the new image ID in the Amazon ECS task definition
-      id: simple_whale_demo-task
+      id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition/dev.json
         container-name: simple_whale_demo
-        #image: ${{ steps.build-image.outputs.image }}
+        image: ${{ steps.build-image.outputs.image }}
         #image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG #${{ steps.build-image.outputs.image }}
     
     - name: List files
@@ -62,7 +59,7 @@ jobs:
     - name: Deploy to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: task-definition/dev.json #${{ steps.simple_whale_demo-task.outputs.task-definition }}
+        task-definition: task-definition/dev.json #${{ steps.task-def.outputs.task-definition }}
         service: fargate-service
         cluster: fargate-cluster
         wait-for-service-stability: true
