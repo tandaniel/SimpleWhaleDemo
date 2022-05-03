@@ -60,7 +60,7 @@ jobs:
     - name: Deploy to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        task-definition: ${{ steps.simple_whale_demo-task.outputs.task-definition }}
         service: simple_whale_demo
         #task-definition: ${{ steps.simple_whale_demo-container.outputs.task-definition }}
         #service: simple_whale_demo-service
