@@ -31,7 +31,6 @@
         "memoryReservation": null,
         "volumesFrom": [],
         "stopTimeout": null,
-        "image": "955009323556.dkr.ecr.eu-central-1.amazonaws.com/simple_whale_demo:acbe2d2dede6da49f248cf8e648e03e136954e77",
         "startTimeout": null,
         "firelensConfiguration": null,
         "dependsOn": null,
