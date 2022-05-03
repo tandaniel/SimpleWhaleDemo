@@ -50,7 +50,7 @@ jobs:
       id: simple_whale_demo-task
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: #mywhaleapp.json
+        task-definition: mywhaleapp.json
         container-name: simple_whale_demo
         image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG #${{ steps.build-image.outputs.image }}
     
