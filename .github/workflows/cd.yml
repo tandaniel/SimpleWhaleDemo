@@ -28,6 +28,7 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v1
 
     - name: Build, tag, and push image to Amazon ECR
+      id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: simple_whale_demo
@@ -52,7 +53,8 @@ jobs:
       with:
         task-definition: task-definition/dev.json
         container-name: simple_whale_demo
-        image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG #${{ steps.build-image.outputs.image }}
+        image: ${{ steps.build-image.outputs.image }}
+        #image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG #${{ steps.build-image.outputs.image }}
     
     - name: List files
       run: ls -R
