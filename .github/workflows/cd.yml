@@ -32,7 +32,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
-        ECR_REPOSITORY: simple_whale_demo
+        ECR_REPOSITORY: sample-app
         AWS_REGION: ${{ secrets.AWS_REGION }} 
         ECS_TASK_DEFINITION: ./task-definition/dev.json
       run: |
@@ -48,8 +48,8 @@ jobs:
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition/dev.json
-        container-name: simple_whale_demo
+        task-definition: task-definition/simple_whale_demo-task-definition.json
+        container-name: sample-app
         image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.AWS_ECR_REPOSITORY }}-${{steps.vars.outputs.stage}}:${{ github.sha }}
         # image: ${{ steps.build-image.outputs.image }}
         # image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG #${{ steps.build-image.outputs.image }}
@@ -60,9 +60,9 @@ jobs:
     - name: Deploy to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: task-definition/dev.json #${{ steps.task-def.outputs.task-definition }}
-        service: fargate-service
-        cluster: fargate-cluster
+        task-definition: task-definition/simple_whale_demo-task-definition.json #${{ steps.task-def.outputs.task-definition }}
+        service: simple_whale_demo-service
+        cluster: simplewhale-cluster
         wait-for-service-stability: true
 
     - name: Logout of Amazon ECR
