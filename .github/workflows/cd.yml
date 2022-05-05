@@ -30,7 +30,7 @@ jobs:
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
-        ECR_REGISTRY: simple_whale_demo	 #${{ steps.login-ecr.outputs.registry }}
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: simple_whale_demo	#sample-app
         IMAGE_TAG: ${{ github.sha }}
         AWS_REGION: ${{ secrets.AWS_REGION }} 
