@@ -1,8 +1,17 @@
-name: Deploy to Amazon ECS
+
+
+# on:
+#   release:
+#     types: [created]
 
 on:
   push:
     branches: [ main ]
+  # run manually:
+  workflow_dispatch:
+
+name: Deploy to Amazon ECS (CI/CD pipeline)
+
 jobs:
   build:
     name: Build image
@@ -34,7 +43,7 @@ jobs:
         ECR_REPOSITORY: simple_whale_demo	#sample-app
         IMAGE_TAG: ${{ github.sha }}
         AWS_REGION: ${{ secrets.AWS_REGION }} 
-        ECS_TASK_DEFINITION: ./task-definition/dev.json
+        # ECS_TASK_DEFINITION: ./task-definition/dev.json
       run: |
           # Build a docker container and
           # push it to ECR so that it can
@@ -48,10 +57,10 @@ jobs:
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition/simple_whale_demo-task-definition.json
+        task-definition: task-definition/aws-task-definition.json
         container-name: simple_whale_demo
-        image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.AWS_ECR_REPOSITORY }}-${{steps.vars.outputs.stage}}:${{ github.sha }}
-        # image: ${{ steps.build-image.outputs.image }}
+        #image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.AWS_ECR_REPOSITORY }}-${{steps.vars.outputs.stage}}:${{ github.sha }}
+        image: ${{ steps.build-image.outputs.image }}
         # image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG #${{ steps.build-image.outputs.image }}
     
     - name: List files
@@ -60,8 +69,9 @@ jobs:
     - name: Deploy to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: task-definition/simple_whale_demo-task-definition.json #${{ steps.task-def.outputs.task-definition }}
-        service: simple_whale_demo-service
+        # task-definition: task-definition/simple_whale_demo-task-definition.json
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: aws-ecs-demo-service
         cluster: simplewhale-cluster
         wait-for-service-stability: true
 
