@@ -72,7 +72,7 @@ jobs:
         # task-definition: task-definition/simple_whale_demo-task-definition.json
         task-definition: ${{ steps.task-def.outputs.task-definition }}
         service: aws-ecs-demo-service
-        cluster: simplewhale-cluster
+        cluster: fargate-cluster
         wait-for-service-stability: true
 
     - name: Logout of Amazon ECR
